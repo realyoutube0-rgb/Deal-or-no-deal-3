@@ -26,7 +26,7 @@ let appState = {
 
 let gameSession = {
   active: false,
-  cases: [], // { id, value, state: 'closed'|'opened'|'player' }
+  cases: [],
   playerCase: null,
   roundIndex: 0,
   casesNeededThisRound: 6,
@@ -36,7 +36,7 @@ let gameSession = {
   entryFee: 0
 };
 
-// --- AUDIO SYNTHESIZER (Web Audio API) ---
+// --- AUDIO SYNTHESIZER ---
 const AudioEngine = {
   ctx: null,
   init() {
@@ -59,7 +59,7 @@ const AudioEngine = {
       gain.connect(this.ctx.destination);
       osc.start();
       osc.stop(this.ctx.currentTime + duration);
-    } catch (e) { /* Audio context fallback */ }
+    } catch (e) { }
   },
   click() { this.playTone(600, 0.05, 'square'); },
   openCase() { this.playTone(300, 0.2, 'sawtooth'); },
@@ -116,7 +116,6 @@ function recordTransaction(description, amount) {
   renderBankView();
 }
 
-// --- CORE FINANCIAL & BANKRUPTCY MATH ---
 function getMaxDebtLimit() {
   return Math.max(2500, appState.peakBalance * 0.25);
 }
@@ -128,7 +127,7 @@ function checkBankruptcy() {
   if (netWorth < -maxDebt) {
     showEndgameModal(
       "BANKRUPT",
-      `Your game debt (-${formatMoney(appState.debt)}) has exceeded your allowable limit (-${formatMoney(maxDebt)}). Financial progression reset required.`
+      `Your debt (-${formatMoney(appState.debt)}) has exceeded your allowable limit (-${formatMoney(maxDebt)}). Financial progression reset required.`
     );
     return true;
   }
@@ -153,21 +152,38 @@ function getCalculatedEntryFee() {
   return Math.max(100, Math.min(fee, 5000000));
 }
 
-// --- GAME LOGIC & ENGINE ---
-function initNewGameSession() {
+// --- ENTRY PAYMENT PROMPT ---
+function promptEntryPayment() {
+  const fee = getCalculatedEntryFee();
+  document.getElementById('entry-fee-amount').innerText = fee === 0 ? "FREE" : formatMoney(fee);
+  document.getElementById('entry-modal').classList.remove('hidden');
+}
+
+function handlePayAndStartGame() {
   const fee = getCalculatedEntryFee();
   
   if (appState.balance < fee && appState.balance > 0) {
-    alert(`Insufficient funds for entry fee (${formatMoney(fee)}). Take an advance in the BANK page.`);
+    AudioEngine.click();
+    alert(`INSUFFICIENT FUNDS!\nYou need ${formatMoney(fee)} to play. Request an advance in the BANK page.`);
+    document.getElementById('entry-modal').classList.add('hidden');
     switchTab('bank-view');
     return;
   }
 
+  AudioEngine.click();
+
   if (fee > 0) {
     appState.balance -= fee;
     recordTransaction("GAME ENTRY FEE", -fee);
+    updateHeaderUI();
   }
 
+  document.getElementById('entry-modal').classList.add('hidden');
+  initNewGameSession(fee);
+}
+
+// --- GAME LOGIC & ENGINE ---
+function initNewGameSession(fee) {
   const shuffled = [...CASE_VALUES].sort(() => Math.random() - 0.5);
 
   gameSession = {
@@ -249,7 +265,6 @@ function handleContinueReveal() {
   }
 }
 
-// --- BANKER MATHEMATICAL FORMULA ---
 function calculateBankerOffer() {
   const remainingValues = gameSession.cases
     .filter(c => c.state === 'closed' || c.state === 'player')
@@ -263,7 +278,6 @@ function calculateBankerOffer() {
   const offerPercentage = 0.20 + (progressRatio * 0.72);
   
   let offer = ev * offerPercentage;
-
   const variance = 1 + (Math.random() * 0.06 - 0.03);
   offer = Math.round(offer * variance);
 
@@ -350,16 +364,29 @@ function renderGameView() {
   const grid = document.getElementById('briefcase-grid');
   const leftCol = document.getElementById('board-left');
   const rightCol = document.getElementById('board-right');
+  const slot = document.getElementById('your-case-slot');
 
   grid.innerHTML = '';
   leftCol.innerHTML = '';
   rightCol.innerHTML = '';
+  if (slot) slot.innerHTML = '';
 
   gameSession.cases.forEach(c => {
+    // Separate player case to the top slot so it cannot be tapped by mistake
+    if (c.state === 'player') {
+      if (slot) {
+        slot.innerHTML = `
+          <div style="font-size:0.75rem; color:var(--text-muted); font-weight:bold; margin-bottom:4px;">YOUR CASE SET ASIDE</div>
+          <div class="briefcase player-case" style="margin: 0 auto; pointer-events: none;">
+            <div class="briefcase-plate">${c.id.toString().padStart(2, '0')}</div>
+          </div>
+        `;
+      }
+      return;
+    }
+
     const el = document.createElement('div');
     el.className = `briefcase ${c.state}`;
-    if (c.state === 'player') el.classList.add('player-case');
-    
     el.innerHTML = `<div class="briefcase-plate">${c.id.toString().padStart(2, '0')}</div>`;
     
     el.addEventListener('click', () => {
@@ -488,6 +515,8 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btn-deal').addEventListener('click', handleDeal);
   document.getElementById('btn-no-deal').addEventListener('click', handleNoDeal);
   document.getElementById('btn-continue-reveal').addEventListener('click', handleContinueReveal);
+  
+  document.getElementById('btn-pay-entry').addEventListener('click', handlePayAndStartGame);
 
   document.getElementById('btn-take-credit').addEventListener('click', () => {
     AudioEngine.click();
@@ -498,7 +527,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     appState.balance += 10000;
     appState.debt += 10800;
-    recordTransaction("FICTIONAL ADVANCE (+8% FEE)", 10000);
+    recordTransaction("BANK ADVANCE (+8% FEE)", 10000);
     updateHeaderUI();
     renderBankView();
   });
@@ -518,11 +547,11 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   document.getElementById('btn-reset-game').addEventListener('click', () => {
-    if (confirm("ARE YOU SURE?\nThis will erase your entire fictional financial history.")) {
+    if (confirm("ARE YOU SURE?\nThis will erase your entire financial history.")) {
       localStorage.removeItem('dond_deluxe_save');
       appState = { balance: 0.00, debt: 0.00, peakBalance: 0.00, transactions: [], history: [], settings: { sound: true, music: true } };
       updateHeaderUI();
-      initNewGameSession();
+      promptEntryPayment();
       switchTab('game-view');
     }
   });
@@ -534,8 +563,8 @@ document.addEventListener('DOMContentLoaded', () => {
       saveData();
       updateHeaderUI();
     }
-    initNewGameSession();
+    promptEntryPayment();
   });
 
-  initNewGameSession();
+  promptEntryPayment();
 });
