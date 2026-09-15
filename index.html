@@ -32,24 +32,16 @@
           <p id="status-subtitle">Select your lucky briefcase to keep until the end.</p>
         </div>
 
-        <!-- BANKER OFFER BANNER -->
-        <div id="banker-banner" class="banker-card hidden">
-          <div class="banker-title">BANKER'S OFFER</div>
-          <div id="banker-offer-amount" class="banker-offer">$0</div>
-          <div class="banker-actions">
-            <button id="btn-deal" class="btn btn-green">DEAL</button>
-            <button id="btn-no-deal" class="btn btn-red">NO DEAL</button>
-          </div>
-        </div>
-
-        <!-- YOUR CASE SLOT (SET ASIDE) -->
+        <!-- YOUR CASE SLOT (SET ASIDE AT TOP) -->
         <div id="your-case-slot" class="your-case-slot"></div>
 
-        <!-- BOARD AND GRID -->
-        <div class="game-board-container">
-          <div id="board-left" class="money-column"></div>
-          <div id="briefcase-grid" class="briefcase-grid"></div>
-          <div id="board-right" class="money-column"></div>
+        <!-- BRIEFCASE GRID (FULL WIDTH CENTERED) -->
+        <div id="briefcase-grid" class="briefcase-grid" style="margin-bottom: 16px;"></div>
+
+        <!-- MONEY BOARD (LEFT & RIGHT COLUMNS TOGETHER BELOW GRID) -->
+        <div class="money-board-container" style="display: flex; gap: 10px; width: 100%;">
+          <div id="board-left" class="money-column" style="flex: 1;"></div>
+          <div id="board-right" class="money-column" style="flex: 1;"></div>
         </div>
       </section>
 
@@ -109,6 +101,18 @@
     </main>
 
     <!-- MODAL POPUPS -->
+    <!-- Banker Offer Center Popup -->
+    <div id="banker-banner" class="modal-overlay hidden">
+      <div class="reveal-card">
+        <div class="banker-title" style="color: var(--gold-bright); font-weight: bold; font-size: 1.2rem; margin-bottom: 8px;">BANKER'S OFFER</div>
+        <div id="banker-offer-amount" class="reveal-amount" style="color: #4cd137; font-size: 2.2rem; margin: 12px 0;">$0</div>
+        <div class="banker-actions" style="display: flex; gap: 10px; width: 100%;">
+          <button id="btn-deal" class="btn btn-green" style="flex: 1; padding: 12px; font-weight: bold; font-size: 1.1rem;">DEAL</button>
+          <button id="btn-no-deal" class="btn btn-red" style="flex: 1; padding: 12px; font-weight: bold; font-size: 1.1rem;">NO DEAL</button>
+        </div>
+      </div>
+    </div>
+
     <!-- Case Reveal Modal -->
     <div id="reveal-modal" class="modal-overlay hidden">
       <div class="reveal-card">

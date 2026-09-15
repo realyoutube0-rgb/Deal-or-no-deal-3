@@ -372,11 +372,10 @@ function renderGameView() {
   if (slot) slot.innerHTML = '';
 
   gameSession.cases.forEach(c => {
-    // Separate player case to the top slot so it cannot be tapped by mistake
     if (c.state === 'player') {
       if (slot) {
         slot.innerHTML = `
-          <div style="font-size:0.75rem; color:var(--text-muted); font-weight:bold; margin-bottom:4px;">YOUR CASE SET ASIDE</div>
+          <div style="font-size:0.75rem; color:var(--text-muted); font-weight:bold; margin-bottom:4px; text-align:center;">YOUR CASE SET ASIDE</div>
           <div class="briefcase player-case" style="margin: 0 auto; pointer-events: none;">
             <div class="briefcase-plate">${c.id.toString().padStart(2, '0')}</div>
           </div>
