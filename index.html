@@ -32,13 +32,10 @@
           <p id="status-subtitle">Select your lucky briefcase to keep until the end.</p>
         </div>
 
-        <!-- YOUR CASE SLOT (SET ASIDE AT TOP) -->
-        <div id="your-case-slot" class="your-case-slot"></div>
-
-        <!-- BRIEFCASE GRID (FULL WIDTH CENTERED) -->
+        <!-- BRIEFCASE GRID -->
         <div id="briefcase-grid" class="briefcase-grid" style="margin-bottom: 16px;"></div>
 
-        <!-- MONEY BOARD (LEFT & RIGHT COLUMNS TOGETHER BELOW GRID) -->
+        <!-- MONEY BOARD -->
         <div class="money-board-container" style="display: flex; gap: 10px; width: 100%;">
           <div id="board-left" class="money-column" style="flex: 1;"></div>
           <div id="board-right" class="money-column" style="flex: 1;"></div>
@@ -51,8 +48,19 @@
           <div class="bank-header">ACCOUNT SUMMARY</div>
           <div id="bank-balance-total" class="bank-total">$0.00</div>
           <div id="bank-debt-amount" class="bank-debt">$0.00 Owed</div>
+          
           <button id="btn-take-credit" class="btn btn-gold" style="margin-top: 12px; width: 100%;">TAKE $10,000 ADVANCE (+8% FEE)</button>
+
+          <!-- PAY DEBT SECTION -->
+          <div style="margin-top: 16px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1);">
+            <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 6px;">PAY OFF DEBT</div>
+            <div style="display: flex; gap: 8px;">
+              <input type="number" id="pay-debt-input" placeholder="Enter amount to pay" style="flex: 1; padding: 8px; border-radius: 6px; border: 1px solid #444; background: #111; color: #fff;">
+              <button id="btn-pay-debt" class="btn btn-green" style="padding: 8px 16px;">PAY</button>
+            </div>
+          </div>
         </div>
+
         <div class="bank-stats-grid">
           <div class="stat-card">
             <span>TOTAL WON</span>
@@ -101,7 +109,7 @@
     </main>
 
     <!-- MODAL POPUPS -->
-    <!-- Banker Offer Center Popup -->
+    <!-- Banker Offer Modal -->
     <div id="banker-banner" class="modal-overlay hidden">
       <div class="reveal-card">
         <div class="banker-title" style="color: var(--gold-bright); font-weight: bold; font-size: 1.2rem; margin-bottom: 8px;">BANKER'S OFFER</div>
@@ -122,14 +130,17 @@
       </div>
     </div>
 
-    <!-- Game Entry Fee Modal -->
+    <!-- Game Entry & Custom Target Modal -->
     <div id="entry-modal" class="modal-overlay hidden">
       <div class="reveal-card">
-        <div class="reveal-case-number">BUY GAME TICKET</div>
-        <div id="entry-fee-amount" class="reveal-amount">$100</div>
-        <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 16px;">
-          Tap below to pay your entry fee from your bank account and start the game.
-        </p>
+        <div class="reveal-case-number">START NEW GAME</div>
+        <div id="entry-fee-amount" class="reveal-amount" style="font-size: 1.5rem; margin: 8px 0;">ENTRY: $100</div>
+        
+        <div style="margin: 12px 0; text-align: left;">
+          <label style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 4px;">SET TOP JACKPOT AMOUNT ($)</label>
+          <input type="number" id="custom-jackpot-input" placeholder="1000000" value="1000000" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #555; background: #111; color: #fff; font-size: 1rem;">
+        </div>
+
         <button id="btn-pay-entry" class="btn btn-gold" style="width: 100%; font-size: 1rem;">PAY & START GAME</button>
       </div>
     </div>

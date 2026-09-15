@@ -4,17 +4,15 @@
    Core JavaScript Engine & Web Audio Sound
    ========================================== */
 
-// --- INITIAL CONSTANTS & VALUES ---
-const CASE_VALUES = [
-  0.01, 1, 5, 10, 25, 50, 75, 100, 200, 300, 400, 500, 750,
-  1000, 2500, 5000, 10000, 25000, 50000, 75000, 100000,
-  250000, 500000, 750000, 1000000, 2000000
+const BASE_RATIOS = [
+  0.00000001, 0.000001, 0.000005, 0.00001, 0.000025, 0.00005, 0.000075,
+  0.0001, 0.0002, 0.0003, 0.0004, 0.0005, 0.00075, 0.001, 0.0025,
+  0.005, 0.01, 0.025, 0.05, 0.075, 0.1, 0.25, 0.375, 0.5, 0.75, 1.0
 ];
 
 const ROUND_TARGETS = [6, 5, 4, 3, 2, 1, 1, 1, 1];
 const TRILLION = 1000000000000;
 
-// --- GAME DATA STATE ---
 let appState = {
   balance: 0.00,
   debt: 0.00,
@@ -33,7 +31,8 @@ let gameSession = {
   casesOpenedThisRound: 0,
   currentOffer: 0,
   pendingRevealValue: null,
-  entryFee: 0
+  entryFee: 0,
+  caseValues: []
 };
 
 // --- AUDIO SYNTHESIZER ---
@@ -85,7 +84,7 @@ function formatMoney(amount) {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
-    minimumFractionDigits: amount % 1 === 0 ? 0 : 2
+    minimumFractionDigits: amount < 1 && amount > 0 ? 2 : 0
   }).format(amount);
 }
 
@@ -152,15 +151,26 @@ function getCalculatedEntryFee() {
   return Math.max(100, Math.min(fee, 5000000));
 }
 
+// --- DYNAMIC CASE VALUE SCALING ---
+function calculateDynamicCases(maxJackpot) {
+  const target = Math.max(100, maxJackpot);
+  return BASE_RATIOS.map((ratio, index) => {
+    if (index === 0) return 0.01;
+    let val = target * ratio;
+    return val >= 1 ? Math.round(val) : Math.round(val * 100) / 100;
+  });
+}
+
 // --- ENTRY PAYMENT PROMPT ---
 function promptEntryPayment() {
   const fee = getCalculatedEntryFee();
-  document.getElementById('entry-fee-amount').innerText = fee === 0 ? "FREE" : formatMoney(fee);
+  document.getElementById('entry-fee-amount').innerText = fee === 0 ? "ENTRY: FREE" : `ENTRY: ${formatMoney(fee)}`;
   document.getElementById('entry-modal').classList.remove('hidden');
 }
 
 function handlePayAndStartGame() {
   const fee = getCalculatedEntryFee();
+  const jackpotInput = parseFloat(document.getElementById('custom-jackpot-input').value) || 1000000;
   
   if (appState.balance < fee && appState.balance > 0) {
     AudioEngine.click();
@@ -179,15 +189,17 @@ function handlePayAndStartGame() {
   }
 
   document.getElementById('entry-modal').classList.add('hidden');
-  initNewGameSession(fee);
+  initNewGameSession(fee, jackpotInput);
 }
 
-// --- GAME LOGIC & ENGINE ---
-function initNewGameSession(fee) {
-  const shuffled = [...CASE_VALUES].sort(() => Math.random() - 0.5);
+// --- GAME LOGIC ---
+function initNewGameSession(fee, maxJackpot) {
+  const generatedValues = calculateDynamicCases(maxJackpot);
+  const shuffled = [...generatedValues].sort(() => Math.random() - 0.5);
 
   gameSession = {
     active: true,
+    caseValues: generatedValues,
     cases: shuffled.map((val, idx) => ({ id: idx + 1, value: val, state: 'closed' })),
     playerCase: null,
     roundIndex: 0,
@@ -244,7 +256,8 @@ function openBriefcase(briefcaseId) {
   document.getElementById('reveal-amount').innerText = formatMoney(c.value);
   document.getElementById('reveal-modal').classList.remove('hidden');
 
-  if (c.value >= 100000) {
+  const maxVal = Math.max(...gameSession.caseValues);
+  if (c.value >= maxVal * 0.1) {
     AudioEngine.revealHigh();
   } else {
     AudioEngine.revealLow();
@@ -359,30 +372,19 @@ function recordHistoryLog(decision, wonAmount, offer) {
   renderHistoryView();
 }
 
-// --- RENDERING VIEWS & UI ---
+// --- RENDERING ---
 function renderGameView() {
   const grid = document.getElementById('briefcase-grid');
   const leftCol = document.getElementById('board-left');
   const rightCol = document.getElementById('board-right');
-  const slot = document.getElementById('your-case-slot');
 
   grid.innerHTML = '';
   leftCol.innerHTML = '';
   rightCol.innerHTML = '';
-  if (slot) slot.innerHTML = '';
 
+  // Render Briefcase Grid (Selected case completely hidden from view)
   gameSession.cases.forEach(c => {
-    if (c.state === 'player') {
-      if (slot) {
-        slot.innerHTML = `
-          <div style="font-size:0.75rem; color:var(--text-muted); font-weight:bold; margin-bottom:4px; text-align:center;">YOUR CASE SET ASIDE</div>
-          <div class="briefcase player-case" style="margin: 0 auto; pointer-events: none;">
-            <div class="briefcase-plate">${c.id.toString().padStart(2, '0')}</div>
-          </div>
-        `;
-      }
-      return;
-    }
+    if (c.state === 'player') return; // Do not render chosen player case on screen
 
     const el = document.createElement('div');
     el.className = `briefcase ${c.state}`;
@@ -399,9 +401,11 @@ function renderGameView() {
     grid.appendChild(el);
   });
 
+  // Render Money Board Columns
+  const activeValues = gameSession.caseValues.length > 0 ? gameSession.caseValues : BASE_RATIOS.map(r => r * 1000000);
   const openedValues = gameSession.cases.filter(c => c.state === 'opened').map(c => c.value);
 
-  CASE_VALUES.forEach((val, idx) => {
+  activeValues.forEach((val, idx) => {
     const isEliminated = openedValues.includes(val);
     const cell = document.createElement('div');
     cell.className = `money-cell ${isEliminated ? 'eliminated' : ''}`;
@@ -517,16 +521,36 @@ document.addEventListener('DOMContentLoaded', () => {
   
   document.getElementById('btn-pay-entry').addEventListener('click', handlePayAndStartGame);
 
+  // Take Loan Advance
   document.getElementById('btn-take-credit').addEventListener('click', () => {
     AudioEngine.click();
     const maxDebt = getMaxDebtLimit();
     if (appState.debt + 10800 > maxDebt) {
-      alert(`Advance denied. Borrowing $10,000 (+8% fee) would exceed your allowable debt cap (-${formatMoney(maxDebt)}).`);
+      alert(`Advance denied. Borrowing $10,000 (+8% fee) would exceed your debt cap (-${formatMoney(maxDebt)}).`);
       return;
     }
     appState.balance += 10000;
     appState.debt += 10800;
     recordTransaction("BANK ADVANCE (+8% FEE)", 10000);
+    updateHeaderUI();
+    renderBankView();
+  });
+
+  // Pay Off Debt Button
+  document.getElementById('btn-pay-debt').addEventListener('click', () => {
+    AudioEngine.click();
+    const amount = parseFloat(document.getElementById('pay-debt-input').value);
+    
+    if (appState.debt <= 0) return alert("You have no debt to pay!");
+    if (!amount || amount <= 0) return alert("Please enter a valid payment amount.");
+    if (amount > appState.balance) return alert("Insufficient bank balance to pay this amount!");
+
+    const actualPay = Math.min(amount, appState.debt);
+    appState.balance -= actualPay;
+    appState.debt -= actualPay;
+    
+    recordTransaction("DEBT REPAYMENT", -actualPay);
+    document.getElementById('pay-debt-input').value = '';
     updateHeaderUI();
     renderBankView();
   });
