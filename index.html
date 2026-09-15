@@ -111,10 +111,17 @@
     <!-- MODAL POPUPS -->
     <!-- Banker Offer Modal -->
     <div id="banker-banner" class="modal-overlay hidden">
-      <div class="reveal-card">
-        <div class="banker-title" style="color: var(--gold-bright); font-weight: bold; font-size: 1.2rem; margin-bottom: 8px;">BANKER'S OFFER</div>
-        <div id="banker-offer-amount" class="reveal-amount" style="color: #4cd137; font-size: 2.2rem; margin: 12px 0;">$0</div>
-        <div class="banker-actions" style="display: flex; gap: 10px; width: 100%;">
+      <div class="reveal-card" style="max-width: 420px; width: 90%;">
+        <div class="banker-title" style="color: var(--gold-bright); font-weight: bold; font-size: 1.2rem; margin-bottom: 4px;">BANKER'S OFFER</div>
+        <div id="banker-offer-amount" class="reveal-amount" style="color: #4cd137; font-size: 2.2rem; margin: 4px 0;">$0</div>
+        
+        <!-- REMAINING UN-ELIMINATED AMOUNTS -->
+        <div style="margin: 12px 0; text-align: left;">
+          <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: bold; margin-bottom: 6px; text-align: center; letter-spacing: 0.5px;">REMAINING AMOUNTS IN PLAY</div>
+          <div id="banker-remaining-list" style="display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; max-height: 120px; overflow-y: auto; padding: 8px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px;"></div>
+        </div>
+
+        <div class="banker-actions" style="display: flex; gap: 10px; width: 100%; margin-top: 8px;">
           <button id="btn-deal" class="btn btn-green" style="flex: 1; padding: 12px; font-weight: bold; font-size: 1.1rem;">DEAL</button>
           <button id="btn-no-deal" class="btn btn-red" style="flex: 1; padding: 12px; font-weight: bold; font-size: 1.1rem;">NO DEAL</button>
         </div>
@@ -130,18 +137,21 @@
       </div>
     </div>
 
-    <!-- Game Entry & Custom Target Modal -->
+    <!-- Game Entry & Custom Cost Ticket Modal -->
     <div id="entry-modal" class="modal-overlay hidden">
       <div class="reveal-card">
-        <div class="reveal-case-number">START NEW GAME</div>
-        <div id="entry-fee-amount" class="reveal-amount" style="font-size: 1.5rem; margin: 8px 0;">ENTRY: $100</div>
+        <div class="reveal-case-number">BUY GAME TICKET</div>
         
-        <div style="margin: 12px 0; text-align: left;">
-          <label style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 4px;">SET TOP JACKPOT AMOUNT ($)</label>
-          <input type="number" id="custom-jackpot-input" placeholder="1000000" value="1000000" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #555; background: #111; color: #fff; font-size: 1rem;">
+        <div style="margin: 16px 0; text-align: left;">
+          <label style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 4px;">HOW MUCH DO YOU WANT TO PAY? ($)</label>
+          <input type="number" id="custom-entry-fee-input" placeholder="100" value="100" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #555; background: #111; color: #fff; font-size: 1.1rem; text-align: center;">
         </div>
 
-        <button id="btn-pay-entry" class="btn btn-gold" style="width: 100%; font-size: 1rem;">PAY & START GAME</button>
+        <div id="calculated-max-jackpot-display" style="margin-bottom: 16px; font-size: 0.95rem; color: #4cd137; font-weight: bold; background: rgba(76, 209, 55, 0.1); padding: 8px; border-radius: 6px; border: 1px solid rgba(76, 209, 55, 0.3);">
+          MAX JACKPOT: $1,000,000
+        </div>
+
+        <button id="btn-pay-entry" class="btn btn-gold" style="width: 100%; font-size: 1rem;">PAY FEE & START GAME</button>
       </div>
     </div>
 

@@ -145,15 +145,9 @@ function checkTrillionVictory() {
   return false;
 }
 
-function getCalculatedEntryFee() {
-  if (appState.balance <= 0) return 0;
-  const fee = Math.floor(appState.balance * 0.05);
-  return Math.max(100, Math.min(fee, 5000000));
-}
-
 // --- DYNAMIC CASE VALUE SCALING ---
 function calculateDynamicCases(maxJackpot) {
-  const target = Math.max(100, maxJackpot);
+  const target = Math.max(10, maxJackpot);
   return BASE_RATIOS.map((ratio, index) => {
     if (index === 0) return 0.01;
     let val = target * ratio;
@@ -161,20 +155,25 @@ function calculateDynamicCases(maxJackpot) {
   });
 }
 
+function updateJackpotDisplayFromFee() {
+  const feeInput = parseFloat(document.getElementById('custom-entry-fee-input').value) || 0;
+  const jackpot = feeInput > 0 ? feeInput * 10000 : 10000;
+  document.getElementById('calculated-max-jackpot-display').innerText = `MAX JACKPOT: ${formatMoney(jackpot)}`;
+}
+
 // --- ENTRY PAYMENT PROMPT ---
 function promptEntryPayment() {
-  const fee = getCalculatedEntryFee();
-  document.getElementById('entry-fee-amount').innerText = fee === 0 ? "ENTRY: FREE" : `ENTRY: ${formatMoney(fee)}`;
   document.getElementById('entry-modal').classList.remove('hidden');
+  updateJackpotDisplayFromFee();
 }
 
 function handlePayAndStartGame() {
-  const fee = getCalculatedEntryFee();
-  const jackpotInput = parseFloat(document.getElementById('custom-jackpot-input').value) || 1000000;
+  const fee = parseFloat(document.getElementById('custom-entry-fee-input').value) || 0;
+  const calculatedJackpot = fee > 0 ? fee * 10000 : 10000;
   
-  if (appState.balance < fee && appState.balance > 0) {
+  if (fee > appState.balance) {
     AudioEngine.click();
-    alert(`INSUFFICIENT FUNDS!\nYou need ${formatMoney(fee)} to play. Request an advance in the BANK page.`);
+    alert(`INSUFFICIENT FUNDS!\nYou have ${formatMoney(appState.balance)} but entered a fee of ${formatMoney(fee)}. Request an advance in the BANK tab.`);
     document.getElementById('entry-modal').classList.add('hidden');
     switchTab('bank-view');
     return;
@@ -189,7 +188,7 @@ function handlePayAndStartGame() {
   }
 
   document.getElementById('entry-modal').classList.add('hidden');
-  initNewGameSession(fee, jackpotInput);
+  initNewGameSession(fee, calculatedJackpot);
 }
 
 // --- GAME LOGIC ---
@@ -301,7 +300,20 @@ function triggerBankerOffer() {
   AudioEngine.banker();
   gameSession.currentOffer = calculateBankerOffer();
   
+  // Render Offer Amount
   document.getElementById('banker-offer-amount').innerText = formatMoney(gameSession.currentOffer);
+  
+  // Render Un-eliminated Amounts inside Offer Modal
+  const remainingListContainer = document.getElementById('banker-remaining-list');
+  const remainingValues = gameSession.cases
+    .filter(c => c.state === 'closed' || c.state === 'player')
+    .map(c => c.value)
+    .sort((a, b) => a - b);
+
+  remainingListContainer.innerHTML = remainingValues
+    .map(val => `<span style="background: rgba(255,255,255,0.1); border: 1px solid var(--gold-bright); color: #fff; font-size: 0.75rem; padding: 3px 7px; border-radius: 4px; font-weight: bold;">${formatMoney(val)}</span>`)
+    .join('');
+
   document.getElementById('banker-banner').classList.remove('hidden');
   updateStatus("BANKER'S OFFER", "Will you take the deal or risk opening more cases?");
 }
@@ -382,9 +394,9 @@ function renderGameView() {
   leftCol.innerHTML = '';
   rightCol.innerHTML = '';
 
-  // Render Briefcase Grid (Selected case completely hidden from view)
+  // Render Briefcase Grid (Player case stays completely hidden)
   gameSession.cases.forEach(c => {
-    if (c.state === 'player') return; // Do not render chosen player case on screen
+    if (c.state === 'player') return;
 
     const el = document.createElement('div');
     el.className = `briefcase ${c.state}`;
@@ -514,6 +526,8 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.nav-item').forEach(btn => {
     btn.addEventListener('click', () => switchTab(btn.dataset.target));
   });
+
+  document.getElementById('custom-entry-fee-input').addEventListener('input', updateJackpotDisplayFromFee);
 
   document.getElementById('btn-deal').addEventListener('click', handleDeal);
   document.getElementById('btn-no-deal').addEventListener('click', handleNoDeal);
