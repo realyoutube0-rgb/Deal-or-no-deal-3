@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Deal or No Deal - Deluxe</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Montserrat:wght@600;700&family=Roboto+Mono:wght@700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- TOP HEADER / STATUS BAR -->
+  <header class="top-bar">
+    <div class="bank-pill">
+      <span class="pill-label">FICTIONAL BANK</span>
+      <span id="top-balance-display" class="pill-value">$0.00</span>
+    </div>
+    <div class="debt-pill" id="top-debt-container" style="display: none;">
+      <span class="pill-label">DEBT</span>
+      <span id="top-debt-display" class="pill-value-danger">-$0.00</span>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT CONTAINER -->
+  <main id="app-container">
+
+    <!-- ==================== GAME VIEW ==================== -->
+    <section id="game-view" class="view-section active">
+      
+      <!-- Banker Offer Banner (Shown during offer phase) -->
+      <div id="banker-banner" class="banker-banner hidden">
+        <div class="banker-title">BANKER'S OFFER</div>
+        <div id="banker-offer-amount" class="banker-amount">$0</div>
+        <div class="banker-actions">
+          <button id="btn-deal" class="btn btn-deal">DEAL</button>
+          <button id="btn-no-deal" class="btn btn-no-deal">NO DEAL</button>
+        </div>
+      </div>
+
+      <!-- Instruction / Round Status -->
+      <div id="game-status-bar" class="status-bar">
+        <h2 id="status-title" class="status-title">CHOOSE YOUR CASE</h2>
+        <p id="status-subtitle" class="status-subtitle">Select your lucky briefcase to start</p>
+      </div>
+
+      <!-- Money Board & Briefcases Split View -->
+      <div class="game-board">
+        <!-- Left Side: Low Values -->
+        <div id="board-left" class="money-column"></div>
+
+        <!-- Center: Briefcase Grid -->
+        <div id="briefcase-grid" class="briefcase-grid"></div>
+
+        <!-- Right Side: High Values -->
+        <div id="board-right" class="money-column"></div>
+      </div>
+
+    </section>
+
+    <!-- ==================== BANK VIEW ==================== -->
+    <section id="bank-view" class="view-section">
+      <div class="bank-card main-balance-card">
+        <span class="card-label">YOUR GAME BANK</span>
+        <h1 id="bank-balance-total" class="balance-title">$0.00</h1>
+        <div class="balance-subtext">AVAILABLE GAME FUNDS</div>
+      </div>
+
+      <div class="bank-stats-grid">
+        <div class="bank-card">
+          <span class="card-label">TOTAL WON</span>
+          <div id="bank-total-won" class="stat-value text-gold">$0.00</div>
+        </div>
+        <div class="bank-card">
+          <span class="card-label">TOTAL SPENT</span>
+          <div id="bank-total-spent" class="stat-value text-red">$0.00</div>
+        </div>
+      </div>
+
+      <!-- Credit / Debt System -->
+      <div class="bank-card credit-card">
+        <div class="credit-header">
+          <span class="card-label">FICTIONAL GAME CREDIT</span>
+          <span id="bank-debt-amount" class="debt-value">$0.00 Owed</span>
+        </div>
+        <p class="credit-desc">Need fictional funds to play high-tier games? Request an advance with an 8% game fee.</p>
+        <button id="btn-take-credit" class="btn btn-secondary">REQUEST $10,000 ADVANCE</button>
+      </div>
+
+      <!-- Transactions -->
+      <div class="bank-card transactions-card">
+        <span class="card-label">TRANSACTION HISTORY</span>
+        <div id="transaction-list" class="transaction-list">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== HISTORY VIEW ==================== -->
+    <section id="history-view" class="view-section">
+      <div class="stats-overview">
+        <div class="stat-box">
+          <span class="stat-num" id="hist-total-games">0</span>
+          <span class="stat-lbl">GAMES PLAYED</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-num text-gold" id="hist-best-deal">$0</span>
+          <span class="stat-lbl">BEST DEAL</span>
+        </div>
+      </div>
+
+      <div class="history-list-container">
+        <h3 class="section-title">PAST GAMES</h3>
+        <div id="history-list" class="history-list">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== SETTINGS VIEW ==================== -->
+    <section id="settings-view" class="view-section">
+      <div class="settings-group">
+        <h3 class="section-title">AUDIO & VISUALS</h3>
+        <div class="setting-row">
+          <span>Sound Effects</span>
+          <button id="toggle-sound" class="btn-toggle active">ON</button>
+        </div>
+        <div class="setting-row">
+          <span>Background Music</span>
+          <button id="toggle-music" class="btn-toggle active">ON</button>
+        </div>
+      </div>
+
+      <div class="settings-group">
+        <h3 class="section-title">DATA MANAGEMENT</h3>
+        <div class="setting-row">
+          <span>Reset All Progress</span>
+          <button id="btn-reset-game" class="btn btn-danger">RESET GAME</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==================== MODALS & OVERLAYS ==================== -->
+
+  <!-- Case Opening Reveal Modal -->
+  <div id="reveal-modal" class="modal-overlay hidden">
+    <div class="reveal-card">
+      <div id="reveal-case-num" class="reveal-case-number">CASE 17</div>
+      <div id="reveal-amount" class="reveal-amount">$0</div>
+      <button id="btn-continue-reveal" class="btn btn-gold">CONTINUE</button>
+    </div>
+  </div>
+
+  <!-- Game Over / Victory Modal -->
+  <div id="endgame-modal" class="modal-overlay hidden">
+    <div class="endgame-card">
+      <h1 id="endgame-title" class="endgame-title">BANKRUPT</h1>
+      <div id="endgame-message" class="endgame-message">You ran out of fictional funds.</div>
+      <button id="btn-endgame-action" class="btn btn-gold">RESTART GAME</button>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAVIGATION BAR -->
+  <nav class="bottom-nav">
+    <button class="nav-item active" data-target="game-view">
+      <span class="nav-icon">💼</span>
+      <span class="nav-label">GAME</span>
+    </button>
+    <button class="nav-item" data-target="bank-view">
+      <span class="nav-icon">🏦</span>
+      <span class="nav-label">BANK</span>
+    </button>
+    <button class="nav-item" data-target="history-view">
+      <span class="nav-icon">📊</span>
+      <span class="nav-label">HISTORY</span>
+    </button>
+    <button class="nav-item" data-target="settings-view">
+      <span class="nav-icon">⚙️</span>
+      <span class="nav-label">SETTINGS</span>
+    </button>
+  </nav>
+
+  <script src="script.js"></script>
+</body>
+</html>

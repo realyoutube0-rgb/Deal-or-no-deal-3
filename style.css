@@ -1,0 +1,551 @@
+/* ==========================================
+   DEAL OR NO DEAL - DELUXE STYLESHEET
+   Targeted for Samsung Galaxy S23 Ultra & Mobile
+   ========================================== */
+
+:root {
+  --bg-color: #080808;
+  --secondary-bg: #151515;
+  --card-bg: #1c1c1c;
+  --gold-primary: #D4AF37;
+  --gold-bright: #F5D76E;
+  --gold-dark: #AA771C;
+  --red-dark: #8B0000;
+  --red-bright: #C1121F;
+  --text-white: #F5F5F5;
+  --text-muted: #8A8A8A;
+  
+  --font-title: 'Cinzel', serif;
+  --font-money: 'Roboto Mono', monospace;
+  --font-ui: 'Montserrat', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-white);
+  font-family: var(--font-ui);
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+}
+
+/* ==================== TOP BAR ==================== */
+.top-bar {
+  background: linear-gradient(180deg, #181818 0%, #0d0d0d 100%);
+  border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+  padding: 10px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.bank-pill, .debt-pill {
+  display: flex;
+  flex-direction: column;
+  background: #121212;
+  border: 1px solid var(--gold-primary);
+  border-radius: 8px;
+  padding: 4px 12px;
+}
+
+.debt-pill {
+  border-color: var(--red-bright);
+}
+
+.pill-label {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+}
+
+.pill-value {
+  font-family: var(--font-money);
+  font-size: 0.95rem;
+  color: var(--gold-bright);
+  font-weight: bold;
+}
+
+.pill-value-danger {
+  font-family: var(--font-money);
+  font-size: 0.95rem;
+  color: var(--red-bright);
+  font-weight: bold;
+}
+
+/* ==================== MAIN CONTENT ==================== */
+#app-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 70px; /* Space for bottom nav */
+}
+
+.view-section {
+  display: none;
+  flex: 1;
+  padding: 12px;
+  flex-direction: column;
+}
+
+.view-section.active {
+  display: flex;
+}
+
+/* ==================== GAME VIEW ==================== */
+.status-bar {
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.status-title {
+  font-family: var(--font-title);
+  color: var(--gold-bright);
+  font-size: 1.3rem;
+  letter-spacing: 1px;
+}
+
+.status-subtitle {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* Banker Banner Overlay */
+.banker-banner {
+  background: linear-gradient(135deg, #1e1b10 0%, #3a2e07 50%, #1e1b10 100%);
+  border: 2px solid var(--gold-bright);
+  border-radius: 12px;
+  padding: 14px;
+  text-align: center;
+  margin-bottom: 12px;
+  box-shadow: 0 0 20px rgba(245, 215, 110, 0.2);
+  animation: fadeIn 0.4s ease-out;
+}
+
+.banker-title {
+  font-family: var(--font-title);
+  color: var(--gold-bright);
+  font-size: 1rem;
+}
+
+.banker-amount {
+  font-family: var(--font-money);
+  font-size: 2rem;
+  color: var(--text-white);
+  margin: 6px 0 12px 0;
+  text-shadow: 0 0 10px var(--gold-primary);
+}
+
+.banker-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+/* Game Layout Grid */
+.game-board {
+  display: grid;
+  grid-template-columns: 85px 1fr 85px;
+  gap: 8px;
+  flex: 1;
+}
+
+.money-column {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  justify-content: space-between;
+}
+
+.money-cell {
+  background: #181818;
+  border: 1px solid #333;
+  border-radius: 4px;
+  padding: 3px 2px;
+  text-align: center;
+  font-family: var(--font-money);
+  font-size: 0.68rem;
+  color: var(--gold-bright);
+  transition: all 0.3s ease;
+}
+
+.money-cell.eliminated {
+  background: #0d0d0d;
+  border-color: #222;
+  color: #444;
+  text-decoration: line-through;
+  opacity: 0.5;
+}
+
+/* ==================== BRIEFCASES ==================== */
+.briefcase-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  align-content: start;
+}
+
+.briefcase {
+  position: relative;
+  aspect-ratio: 1.3 / 1;
+  background: linear-gradient(145deg, #282828, #111111);
+  border: 2px solid var(--gold-primary);
+  border-radius: 6px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.8), inset 0 1px 1px rgba(255,255,255,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+/* Metallic Handle */
+.briefcase::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  width: 34%;
+  height: 6px;
+  background: linear-gradient(90deg, var(--gold-dark), var(--gold-bright), var(--gold-dark));
+  border-radius: 3px 3px 0 0;
+  border: 1px solid #000;
+}
+
+/* Number Plate */
+.briefcase-plate {
+  background: linear-gradient(135deg, var(--gold-primary), var(--gold-bright), var(--gold-dark));
+  color: #080808;
+  font-family: var(--font-title);
+  font-weight: 700;
+  font-size: 0.9rem;
+  padding: 2px 8px;
+  border-radius: 3px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.6);
+}
+
+.briefcase.player-case {
+  border-color: var(--gold-bright);
+  box-shadow: 0 0 15px var(--gold-bright), inset 0 0 8px var(--gold-bright);
+}
+
+.briefcase.player-case::after {
+  content: 'YOURS';
+  position: absolute;
+  bottom: 2px;
+  font-size: 0.55rem;
+  color: var(--gold-bright);
+  font-weight: bold;
+  letter-spacing: 0.5px;
+}
+
+.briefcase.opened {
+  opacity: 0.15;
+  pointer-events: none;
+  border-color: #333;
+}
+
+/* ==================== BANK VIEW ==================== */
+.bank-card {
+  background: var(--card-bg);
+  border: 1px solid #2a2a2a;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+}
+
+.main-balance-card {
+  text-align: center;
+  background: linear-gradient(135deg, #181818 0%, #22221b 100%);
+  border-color: var(--gold-primary);
+}
+
+.card-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+}
+
+.balance-title {
+  font-family: var(--font-money);
+  font-size: 2.2rem;
+  color: var(--gold-bright);
+  margin: 6px 0;
+}
+
+.balance-subtext {
+  font-size: 0.7rem;
+  color: var(--gold-primary);
+  letter-spacing: 0.5px;
+}
+
+.bank-stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.stat-value {
+  font-family: var(--font-money);
+  font-size: 1.1rem;
+  margin-top: 6px;
+  font-weight: bold;
+}
+
+.credit-card {
+  border-left: 4px solid var(--gold-primary);
+}
+
+.credit-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.debt-value {
+  font-family: var(--font-money);
+  color: var(--red-bright);
+  font-size: 0.9rem;
+}
+
+.credit-desc {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+  line-height: 1.3;
+}
+
+.transaction-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.tx-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px;
+  background: #121212;
+  border-radius: 6px;
+  border-left: 3px solid #333;
+}
+
+.tx-item.positive { border-left-color: #2e7d32; }
+.tx-item.negative { border-left-color: var(--red-bright); }
+
+.tx-desc { font-size: 0.8rem; }
+.tx-date { font-size: 0.65rem; color: var(--text-muted); }
+.tx-amount { font-family: var(--font-money); font-size: 0.85rem; }
+
+/* ==================== BUTTONS & UTILITIES ==================== */
+.btn {
+  padding: 10px 16px;
+  border-radius: 6px;
+  font-family: var(--font-ui);
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.1s, opacity 0.2s;
+}
+
+.btn:active { transform: scale(0.96); }
+
+.btn-gold {
+  background: linear-gradient(135deg, var(--gold-primary), var(--gold-bright));
+  color: #000;
+}
+
+.btn-deal {
+  background: linear-gradient(135deg, #2e7d32, #4caf50);
+  color: white;
+  flex: 1;
+  font-size: 1.1rem;
+}
+
+.btn-no-deal {
+  background: linear-gradient(135deg, var(--red-dark), var(--red-bright));
+  color: white;
+  flex: 1;
+  font-size: 1.1rem;
+}
+
+.btn-secondary {
+  background: #2a2a2a;
+  color: var(--gold-bright);
+  border: 1px solid var(--gold-primary);
+  width: 100%;
+}
+
+.btn-danger {
+  background: var(--red-dark);
+  color: white;
+}
+
+.btn-toggle {
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid #444;
+  background: #111;
+  color: var(--text-muted);
+  font-weight: bold;
+}
+
+.btn-toggle.active {
+  background: var(--gold-primary);
+  color: #000;
+  border-color: var(--gold-bright);
+}
+
+.text-gold { color: var(--gold-bright); }
+.text-red { color: var(--red-bright); }
+.hidden { display: none !important; }
+
+/* ==================== SETTINGS & HISTORY ==================== */
+.section-title {
+  font-family: var(--font-title);
+  color: var(--gold-primary);
+  font-size: 0.9rem;
+  margin-bottom: 10px;
+}
+
+.settings-group {
+  background: var(--card-bg);
+  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 12px;
+}
+
+.setting-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #282828;
+}
+
+.setting-row:last-child { border-bottom: none; }
+
+.stats-overview {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.stat-box {
+  background: var(--card-bg);
+  border-radius: 8px;
+  padding: 12px;
+  text-align: center;
+}
+
+.stat-num {
+  display: block;
+  font-family: var(--font-money);
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.stat-lbl {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+}
+
+/* ==================== MODALS ==================== */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.reveal-card, .endgame-card {
+  background: linear-gradient(145deg, #1c1c1c, #0d0d0d);
+  border: 2px solid var(--gold-bright);
+  border-radius: 16px;
+  padding: 24px;
+  text-align: center;
+  width: 100%;
+  max-width: 320px;
+  box-shadow: 0 0 30px rgba(212, 175, 55, 0.3);
+  animation: popIn 0.3s ease-out;
+}
+
+.reveal-case-number {
+  font-family: var(--font-title);
+  color: var(--gold-primary);
+  font-size: 1.1rem;
+}
+
+.reveal-amount {
+  font-family: var(--font-money);
+  font-size: 2.2rem;
+  color: var(--text-white);
+  margin: 16px 0 20px 0;
+  text-shadow: 0 0 15px var(--gold-bright);
+}
+
+/* ==================== NAVIGATION BAR ==================== */
+.bottom-nav {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  height: 60px;
+  background: #0d0d0d;
+  border-top: 1px solid #262626;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  z-index: 99;
+}
+
+.nav-item {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  cursor: pointer;
+  width: 25%;
+}
+
+.nav-item.active {
+  color: var(--gold-bright);
+}
+
+.nav-icon { font-size: 1.2rem; }
+.nav-label { font-size: 0.65rem; font-weight: 600; }
+
+/* Keyframes */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes popIn {
+  from { opacity: 0; transform: scale(0.85); }
+  to { opacity: 1; transform: scale(1); }
+}
